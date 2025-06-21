@@ -9,47 +9,66 @@ const Quest = ({ progress, setProgress, onComplete }) => {
     {
       id: 1,
       type: 'choice',
-      question: 'Помнишь, сколько галерей-музеев-фестивалей вы насобирали в таблице?',
-      options: ['64', '96', '128', '156'],
-      correct: 2,
-      hint: 'Ты же писала мне об этом в апреле...'
+      question: 'Если бы галереи Барселоны были пылью в пустыне, сколько песчинок ты насобирала?',
+      options: ['∞ бесконечность', '128 священных крупинок', '42 (ответ на всё)', 'Столько, сколько звёзд над плайей'],
+      correct: 1,
+      hint: 'Ты же писала мне точное число в апреле... 128!'
     },
     {
       id: 2,
       type: 'choice',
-      question: 'Какой музей в Барселоне ты добавляла в RSS-ленту?',
-      options: ['MNAC', 'MACBA', 'Picasso Museum', 'Joan Miró Foundation'],
-      correct: 1,
-      hint: 'Музей современного искусства...'
+      question: 'В параллельной вселенной ты куратор. Какую выставку ты открываешь?',
+      options: [
+        '"Данные как искусство: визуализация хаоса"',
+        '"Руфтопы Барселоны: между небом и бетоном"',
+        '"JSON-поэзия современности"',
+        '"В одном ряду с Бритни: поп-арт абсурда"'
+      ],
+      correct: 3,
+      hint: 'Помнишь, как ты угарала с этого? "В одном ряду с Бритни"!'
     },
     {
       id: 3,
       type: 'input',
-      question: 'В каком боте можно посмотреть статистику аренды жилья в Испании?',
-      placeholder: 'Введи username бота',
-      correct: '@spainrental_bot',
-      hint: 'Виталик показывал тебе этого бота...'
+      question: 'Ты встречаешь духа пустыни. Он спрашивает: "Как читать священные свитки .json?" Что ты отвечаешь?',
+      placeholder: 'Назови инструмент просвещения',
+      correct: 'jsoneditoronline',
+      alternatives: ['jsonformatter', 'json viewer', 'jsoneditoronline.org'],
+      hint: 'Виталик же скидывал тебе ссылки на эти сайты...'
     },
     {
       id: 4,
-      type: 'data',
-      question: 'Выбери правильную последовательность: что важнее всего при сборе данных о галереях?',
+      type: 'choice',
+      question: 'На Burning Man ты создаёшь арт-инсталляцию из данных. Что в основе?',
       options: [
-        ['Name', 'Instagram', 'Coordinates', 'Address'],
-        ['Type', 'Name', 'Web', 'Instagram'],
-        ['Google link', 'Address', 'Schedule', 'Phone'],
-        ['Artists', 'Events', 'Tickets', 'Reviews']
+        'Координаты всех музеев, превращённые в созвездие',
+        'RSS-ленты MACBA, звучащие как мантры',
+        'Instagram-парсинг, рисующий мандалы',
+        'Всё вышеперечисленное в виде дата-скульптуры'
       ],
-      correct: 1,
-      hint: 'Ты сама составляла эту структуру...'
+      correct: 3,
+      hint: 'Твоя главная тема - собирать и структурировать данные о галереях!'
     },
     {
       id: 5,
+      type: 'ritual',
+      question: 'Финальный ритуал: расставь элементы идеального подарка по важности',
+      options: ['💰 Цена', '📏 Размер', '💝 Внимание', '🎁 Упаковка'],
+      correct: [2, 0, 1, 3], // Внимание первое
+      hint: 'Ты же сама сказала: "для меня самое важное внимание"'
+    },
+    {
+      id: 6,
       type: 'choice',
-      question: 'Что самое важное в подарке?',
-      options: ['Цена', 'Размер', 'Внимание', 'Упаковка'],
+      question: 'Deep playa soulmate видит в тебе...',
+      options: [
+        'Хранительницу данных пустыни',
+        'Картографа несуществующих галерей',
+        'Ту, кто превращает хаос в структуру',
+        'Искателя искусства в шуме информации'
+      ],
       correct: 2,
-      hint: 'Ты сама это написала 😊'
+      hint: 'Вся твоя работа - это превращение хаоса данных в красивые структуры!'
     }
   ];
 
@@ -57,10 +76,15 @@ const Quest = ({ progress, setProgress, onComplete }) => {
     const question = questions[currentQuestion];
     let isCorrect = false;
 
-    if (question.type === 'choice' || question.type === 'data') {
+    if (question.type === 'choice') {
       isCorrect = answerIndex === question.correct;
     } else if (question.type === 'input') {
-      isCorrect = inputValue.toLowerCase().trim() === question.correct.toLowerCase();
+      const answer = inputValue.toLowerCase().trim();
+      isCorrect = answer === question.correct || 
+                  (question.alternatives && question.alternatives.some(alt => answer.includes(alt.toLowerCase())));
+    } else if (question.type === 'ritual') {
+      // Для ритуала - проверяем, что "Внимание" на первом месте
+      isCorrect = answerIndex === 2;
     }
 
     if (isCorrect) {
@@ -85,13 +109,13 @@ const Quest = ({ progress, setProgress, onComplete }) => {
 
   return (
     <div className="container">
-      <h2>Вопрос {currentQuestion + 1} из {questions.length}</h2>
+      <h2>Испытание {currentQuestion + 1} из {questions.length}</h2>
       
       <div className="progress-bar">
         <div className="progress-fill" style={{ width: `${progress}%` }}></div>
       </div>
 
-      <h3>{question.question}</h3>
+      <h3 style={{ fontSize: '1.3em', lineHeight: '1.5' }}>{question.question}</h3>
 
       {question.type === 'choice' && (
         <div>
@@ -100,6 +124,7 @@ const Quest = ({ progress, setProgress, onComplete }) => {
               key={index}
               className="answer-button"
               onClick={() => handleAnswer(index)}
+              style={{ fontSize: '1.1em' }}
             >
               {option}
             </button>
@@ -121,20 +146,24 @@ const Quest = ({ progress, setProgress, onComplete }) => {
               }
             }}
           />
-          <button onClick={() => handleAnswer()}>Проверить</button>
+          <button onClick={() => handleAnswer()}>Ответить духу</button>
         </div>
       )}
 
-      {question.type === 'data' && (
-        <div className="art-grid">
+      {question.type === 'ritual' && (
+        <div>
+          <p style={{ marginBottom: '20px', opacity: 0.8 }}>
+            Выбери самое важное:
+          </p>
           {question.options.map((option, index) => (
-            <div
+            <button
               key={index}
-              className="art-item"
+              className="answer-button"
               onClick={() => handleAnswer(index)}
+              style={{ fontSize: '1.2em' }}
             >
-              {option.join(' → ')}
-            </div>
+              {option}
+            </button>
           ))}
         </div>
       )}
